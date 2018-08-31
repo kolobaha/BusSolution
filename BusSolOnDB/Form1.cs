@@ -59,7 +59,6 @@ namespace BusSolOnDB
         List<Transaction> TransportMap = new List<Transaction>();
         List<Transaction> bigTransportMap = new List<Transaction>();
 
-
         public Form1()
         {
             InitializeComponent();
@@ -139,14 +138,8 @@ namespace BusSolOnDB
 
         private async void Button1_Click(object sender, EventArgs e)//Генерируем транспортную карту переездов 
         {
-            string[] startTimeS = stTimeTB.Text.Split(':');
-            TimeSpan startTime = new TimeSpan(Convert.ToInt32(startTimeS[0]), Convert.ToInt32(startTimeS[1]), 0); // Время отправления пассажира, еще надо докуртить 
-            int startStation = Convert.ToInt32(startStTB.Text);
-            int endStation = Convert.ToInt32(endStTB.Text);//Начальная и конечные станции
-            MessageBox.Show("Оправление в " + startTime.Hours + " : " + startTime.Minutes + " от станции " + startStation + " до " + endStation);
-            await sqlConnection.OpenAsync();
-            SqlDataAdapter sqlDataAdapter = null;
-            SqlCommand sqlCommand = new SqlCommand("Insert into [TransportMap] values ", sqlConnection);
+            int startTime = Convert.ToInt32(stTimeTB.Text);
+            GetGlobalMap(startTime);
 
 
         }
@@ -168,7 +161,7 @@ namespace BusSolOnDB
         }
         private void EnterTestDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            
+
         }
         private void GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
         {
@@ -176,22 +169,45 @@ namespace BusSolOnDB
             foreach (var move in moves)
             {
                 endTime = move.Time + Math.Max(TransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
-                MessageBox.Show(endTime.ToString());
                 if (endTime < 60 * 24)//Добавляем только те переезды, что осуществляюстя до 24:00
                 {
                     TransportMap.Add(new Transaction(
                           move.BusId,
                           move.StationFrom,
-                          Math.Max(TransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault()),
+                          Math.Max(TransportMap.
+                          Where(x => x.EndStation == move.StationFrom).
+                          Select(x => x.EndTime).FirstOrDefault(),
+                            buses.Where(x => x.Id == move.BusId).
+                            Select(x => x.StartTime).FirstOrDefault()),
                           move.StationTo,
                           move.Time,
                           buses.Where(x => x.Id == move.BusId).Select(x => x.Cost).FirstOrDefault()));
                     listBox2.Items.Add(TransportMap[TransportMap.Count() - 1].ToString());
                 }
             }
-            bigTransportMap = TransportMap;
-            int k,j = 1;
-                
+
+        }
+        public void GetGlobalMap(int startTime)//Генерация полной карты переездов
+        {
+            int period;
+            int iteration;
+            foreach (var transact in TransportMap)
+            {
+                iteration = 0;
+                period = Buses.Where(x => x.Id == transact.BusId).Select(x => x.Period).FirstOrDefault();
+                while (transact.EndTime + period * iteration <= 1440)
+                {
+                    if (transact.StartTime + period * iteration >= startTime)
+                        bigTransportMap.Add(new Transaction(transact, period * iteration));
+                    iteration++;
+                }
+            }
+            bigTransportMap = bigTransportMap.OrderBy(x => x.StartTime).ToList();
+            listBox2.Items.Clear();
+            foreach (var transact in bigTransportMap)
+            {
+                listBox2.Items.Add(transact.ToString());
+            }
         }
     }
 }

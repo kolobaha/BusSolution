@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/BusSolOnDB/v15/Server/sqlite3/storage.ide-wal
+/.vs/BusSolOnDB/v15/Server/sqlite3/storage.ide-shm
+/.vs/BusSolOnDB/v15/Server/sqlite3/storage.ide
+/.vs/BusSolOnDB/v15/Server/sqlite3/db.lock

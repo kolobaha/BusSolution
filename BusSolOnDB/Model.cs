@@ -25,9 +25,18 @@ namespace BusSolOnDB
             EndTime = StartTime + time;
             Cost = cost;
         }
+        public Transaction(Transaction oldTansact, int period)
+        {
+            BusId = oldTansact.BusId;
+            StartStation = oldTansact.StartStation;
+            EndStation = oldTansact.EndStation;
+            StartTime = oldTansact.StartTime + period;
+            EndTime = oldTansact.EndTime + period;
+            Cost = oldTansact.Cost;
+        }
         public override string ToString()
         {
-            return PassedBuses +" | "+ PassedStations + " | " + BusId + " | " + StartStation + " | " + EndStation + " | " + StartTime + " | " + EndTime + " | " + Cost;
+            return PassedBuses + " | " + PassedStations + " | " + BusId + " | " + StartStation + " | " + EndStation + " | " + StartTime + " | " + EndTime + " | " + Cost;
         }
     }
     class Bus// Класс для хранения исходных данных об автобусах
@@ -35,7 +44,7 @@ namespace BusSolOnDB
         public int Id { get; set; }
         public int Cost { get; set; }
         public int StartTime { get; set; } //Время в минутах от 0 до 1440  
-        public int Period { get; set; } // Период цикал маршрута
+        public int Period { get; set; } // Период цикла
         public Bus(int id, int cost, int start)
         {
             Id = id;
