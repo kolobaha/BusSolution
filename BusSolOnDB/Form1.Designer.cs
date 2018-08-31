@@ -194,6 +194,7 @@
             this.endStTB.Name = "endStTB";
             this.endStTB.Size = new System.Drawing.Size(100, 20);
             this.endStTB.TabIndex = 4;
+            this.endStTB.Text = "3";
             // 
             // startStTB
             // 
@@ -201,6 +202,7 @@
             this.startStTB.Name = "startStTB";
             this.startStTB.Size = new System.Drawing.Size(100, 20);
             this.startStTB.TabIndex = 3;
+            this.startStTB.Text = "1";
             // 
             // stTimeTB
             // 
@@ -208,6 +210,7 @@
             this.stTimeTB.Name = "stTimeTB";
             this.stTimeTB.Size = new System.Drawing.Size(100, 20);
             this.stTimeTB.TabIndex = 2;
+            this.stTimeTB.Text = "800";
             // 
             // listBox2
             // 
@@ -219,7 +222,7 @@
             // 
             // Gen_button
             // 
-            this.Gen_button.Location = new System.Drawing.Point(650, 21);
+            this.Gen_button.Location = new System.Drawing.Point(578, 21);
             this.Gen_button.Name = "Gen_button";
             this.Gen_button.Size = new System.Drawing.Size(101, 23);
             this.Gen_button.TabIndex = 0;

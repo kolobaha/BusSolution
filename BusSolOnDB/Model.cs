@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BusSolOnDB
 {
-    class Transaction// Класс описывает все возможные переезды для исходных данных. Эксземпляр класса - значение одного конкретного оп времени и маршруту переезда
+    public class Transaction// Класс описывает все возможные переезды для исходных данных. Эксземпляр класса - значение одного конкретного оп времени и маршруту переезда
     {
         public string PassedBuses { get; set; } // 2 неатомарынх атрибута, хранящие историю о переездах, предшевствующих данному.
         public string PassedStations { get; set; }
@@ -24,6 +24,10 @@ namespace BusSolOnDB
             StartTime = startTime;
             EndTime = StartTime + time;
             Cost = cost;
+        }
+        public Transaction()
+        {
+
         }
         public Transaction(Transaction oldTansact, int period)
         {

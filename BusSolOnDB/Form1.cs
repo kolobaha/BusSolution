@@ -52,8 +52,6 @@ namespace BusSolOnDB
 {
     public partial class Form1 : Form
     {
-        static string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\Колобаха\source\repos\BusSolOnDB\BusSolOnDB\BusFleet.mdf;Integrated Security=True";
-        SqlConnection sqlConnection = new SqlConnection(connectionString); // Подключение к локальной базе данных
         List<Bus> Buses = new List<Bus>();
         List<Move> Moves = new List<Move>();
         List<Transaction> TransportMap = new List<Transaction>();
@@ -81,14 +79,12 @@ namespace BusSolOnDB
 
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (sqlConnection != null && sqlConnection.State != ConnectionState.Closed)
-                sqlConnection.Close();
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (sqlConnection != null && sqlConnection.State != ConnectionState.Closed)
-                sqlConnection.Close();
+
         }
 
         private void DownloadToolStripMenuItem_Click(object sender, EventArgs e)//Метод загрузки
@@ -138,9 +134,11 @@ namespace BusSolOnDB
 
         private async void Button1_Click(object sender, EventArgs e)//Генерируем транспортную карту переездов 
         {
+            bigTransportMap.Clear();
             int startTime = Convert.ToInt32(stTimeTB.Text);
-            GetGlobalMap(startTime);
-
+            int startStation = Convert.ToInt32(startStTB.Text);
+            GetGlobalMap(GetTransportMap(Buses, Moves), startTime);
+            SolutionIteration(startStation);
 
         }
         public void GetTestData()
@@ -157,24 +155,25 @@ namespace BusSolOnDB
             {
                 Bus.Period = Moves.Where(c => c.BusId == Bus.Id).Sum(c => c.Time);
             }
-            GetTransportMap(Buses, Moves);
+            // GetTransportMap(Buses, Moves);
         }
         private void EnterTestDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
-        private void GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
+        private List<Transaction> GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
         {
+            List<Transaction> initialTransportMap = new List<Transaction>();
             int endTime = 0;
             foreach (var move in moves)
             {
-                endTime = move.Time + Math.Max(TransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
+                endTime = move.Time + Math.Max(initialTransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
                 if (endTime < 60 * 24)//Добавляем только те переезды, что осуществляюстя до 24:00
                 {
-                    TransportMap.Add(new Transaction(
+                    initialTransportMap.Add(new Transaction(
                           move.BusId,
                           move.StationFrom,
-                          Math.Max(TransportMap.
+                          Math.Max(initialTransportMap.
                           Where(x => x.EndStation == move.StationFrom).
                           Select(x => x.EndTime).FirstOrDefault(),
                             buses.Where(x => x.Id == move.BusId).
@@ -182,16 +181,15 @@ namespace BusSolOnDB
                           move.StationTo,
                           move.Time,
                           buses.Where(x => x.Id == move.BusId).Select(x => x.Cost).FirstOrDefault()));
-                    listBox2.Items.Add(TransportMap[TransportMap.Count() - 1].ToString());
                 }
             }
-
+            return initialTransportMap;
         }
-        public void GetGlobalMap(int startTime)//Генерация полной карты переездов
+        public void GetGlobalMap(List<Transaction> transportMap, int startTime)//Генерация полной карты переездов
         {
             int period;
             int iteration;
-            foreach (var transact in TransportMap)
+            foreach (var transact in transportMap)
             {
                 iteration = 0;
                 period = Buses.Where(x => x.Id == transact.BusId).Select(x => x.Period).FirstOrDefault();
@@ -208,6 +206,22 @@ namespace BusSolOnDB
             {
                 listBox2.Items.Add(transact.ToString());
             }
+        }
+        public void SolutionIteration(int startStation)
+        {
+            TransportMap = bigTransportMap.Where(x => x.StartStation == startStation).ToList();// Возможные пути отправления с указанной станции
+            if (TransportMap.Count == 0)
+                MessageBox.Show("С данной станции в принципе не сущесвтует отправленя.");
+        }
+        public List<Transaction> SolutionIteration(List<Transaction> oldTransportMap)
+        {
+            List<Transaction> newTransportMap = new List<Transaction>();
+            Transaction newTransact = new Transaction();
+            foreach (var transact in oldTransportMap)
+            {
+                
+            }
+            return newTransportMap;
         }
     }
 }
