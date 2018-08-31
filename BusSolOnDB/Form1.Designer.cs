@@ -49,6 +49,7 @@
             this.Gen_button = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.listBox3 = new System.Windows.Forms.ListBox();
+            this.IterateBut = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -145,6 +146,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.IterateBut);
             this.tabPage2.Controls.Add(this.label3);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.label1);
@@ -249,6 +251,16 @@
             this.listBox3.Size = new System.Drawing.Size(792, 400);
             this.listBox3.TabIndex = 0;
             // 
+            // IterateBut
+            // 
+            this.IterateBut.Location = new System.Drawing.Point(685, 21);
+            this.IterateBut.Name = "IterateBut";
+            this.IterateBut.Size = new System.Drawing.Size(75, 23);
+            this.IterateBut.TabIndex = 8;
+            this.IterateBut.Text = "Iteration";
+            this.IterateBut.UseVisualStyleBackColor = true;
+            this.IterateBut.Click += new System.EventHandler(this.IterateBut_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -297,6 +309,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ToolStripMenuItem вводИсходныхДанныхToolStripMenuItem;
         private System.Windows.Forms.ListBox listBox3;
+        private System.Windows.Forms.Button IterateBut;
     }
 }
 
