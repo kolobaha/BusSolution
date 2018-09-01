@@ -8,15 +8,16 @@ namespace BusSolOnDB
 {
     public class Transaction// Класс описывает все возможные переезды для исходных данных. Эксземпляр класса - значение одного конкретного оп времени и маршруту переезда
     {
-        public string PassedBuses { get; set; } // 2 неатомарынх атрибута, хранящие историю о переездах, предшевствующих данному.
-        public string PassedStations { get; set; }
+        public List<int> PassedBuses { get; set; } // 2 неатомарынх атрибута, хранящие историю о переездах, предшевствующих данному.
+        public List<int> PassedStations { get; set; }
         public int BusId { get; set; }
         public int StartStation { get; set; }
         public int EndStation { get; set; }
         public int StartTime { get; set; }
         public int EndTime { get; set; }
         public int Cost { get; set; }// Сумма проезда по данной транзакии на текущий момент
-        public Transaction(int busId, int startSt, int startTime, int endSt, int time, int cost)
+        public int CurrentWayLength { get; set; }//Текущая длинна маршрута
+        public Transaction(int busId, int startSt, int startTime, int endSt, int time, int cost):this()
         {
             BusId = busId;
             StartStation = startSt;
@@ -27,9 +28,11 @@ namespace BusSolOnDB
         }
         public Transaction()
         {
-
+            PassedBuses = new List<int>();
+            PassedStations = new List<int>();
         }
-        public Transaction(Transaction oldTansact, int period)
+        
+        public Transaction(Transaction oldTansact, int period):this()
         {
             BusId = oldTansact.BusId;
             StartStation = oldTansact.StartStation;
@@ -40,7 +43,17 @@ namespace BusSolOnDB
         }
         public override string ToString()
         {
-            return PassedBuses + " | " + PassedStations + " | " + BusId + " | " + StartStation + " | " + EndStation + " | " + StartTime + " | " + EndTime + " | " + Cost;
+            string stations = "";
+            string buses = "";
+            foreach (var station in PassedStations)
+            {
+                stations += station.ToString() + " ";
+            }
+            foreach (var bus in PassedBuses)
+            {
+                buses += bus.ToString() + " ";
+            }
+            return buses + " | " + stations + " | " + BusId + " | " + StartStation + " | " + EndStation + " | " + StartTime + " | " + EndTime + " | " + Cost + " | " + CurrentWayLength;
         }
     }
     class Bus// Класс для хранения исходных данных об автобусах
