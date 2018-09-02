@@ -56,11 +56,18 @@ namespace BusSolOnDB
         public Form1()
         {
             InitializeComponent();
+            ShowBusesMoves();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
             TaskBusFleet.GetTestData();
+
+        }
+        public void ShowBusesMoves()
+        {
+            listBox1.Items.Clear();
+            listBox3.Items.Clear();
             listBox1.Items.Add("Buses:");
             foreach (var bus in TaskBusFleet.Buses)
             {
@@ -87,11 +94,11 @@ namespace BusSolOnDB
         {
             StreamReader myStream = null;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.InitialDirectory = "c:\\";
+            openFileDialog1.InitialDirectory = "c:\\Documents";
             openFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
-            
+
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -100,8 +107,7 @@ namespace BusSolOnDB
                     {
                         using (myStream)
                         {
-                            TaskBusFleet.EnterData(myStream);
-                            MessageBox.Show(openFileDialog1.FileName);
+                            TaskBusFleet.ReadData(myStream);
                         }
                     }
                 }
@@ -110,8 +116,9 @@ namespace BusSolOnDB
                     MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
                 }
             }
+            ShowBusesMoves();
         }
-       
+
 
         private void Button1_Click(object sender, EventArgs e)//Генерируем транспортную карту переездов 
         {
@@ -126,7 +133,7 @@ namespace BusSolOnDB
         {
 
         }
-       
+
         public void ShowIt(List<Transaction> transactionMap)
         {
             listBox2.Items.Clear();
@@ -139,7 +146,7 @@ namespace BusSolOnDB
 
         public int GetStartTime()
         {
-            return Convert.ToInt32(stTimeTB.Text);
+            return Convert.ToInt32(startHour.Text) * Constans.MinutesInHour + Convert.ToInt32(startMinute.Text);
         }
         public int GetStartStation()
         {
@@ -151,24 +158,34 @@ namespace BusSolOnDB
         }
         public void SolutionResult()
         {
-            var res = TaskBusFleet.Solution(GetStartStation(), GetEndStation(), GetStartTime()).ToList();
-            if (res == null || res.Count != 2) MessageBox.Show("Решение ошибочно!");
+            List<Transaction> res = TaskBusFleet.Solution(GetStartStation(), GetEndStation(), GetStartTime()).ToList();
+            if (res == null || res.Count != 2)
+            {
+                MessageBox.Show("Решение ошибочно или его нет!");
+                return;
+            }
 
             string timeRes = "Самый быстрый маршрут : ";
-            foreach (var station in res[0].PassedStations)
+            for (int i = 0; i < res[0].PassedStations.Count - 1; i++)
             {
-                timeRes += station + " ";
+                timeRes += res[0].PassedStations[i] + "(" + res[0].Buses[i] + ")";
             }
-            timeRes += res[0].StartStation.ToString() +" "+ res[0].EndStation.ToString();
+            try { timeRes += res[0].PassedStations[res[0].PassedStations.Count - 1] + " "; } catch { }
+            timeRes += res[0].StartStation.ToString() + "(" + res[0].BusId + ")" + res[0].EndStation.ToString();
 
-            timeRes += " Время прибытия : " + res[0].EndTime/Constans.MinutesInHour + " " + res[0].EndTime % Constans.MinutesInHour;
+            timeRes += " Время прибытия : " + Constans.GetTimeFromNimutes(res[0].EndTime);
 
             string costRes = "Самый дешёвый маршрут : ";
-            foreach (var station in res[1].PassedStations)
+            foreach  (var station in res[1].PassedStations)
             {
-                costRes += station + " ";
+                costRes += station + " " ;
             }
-            costRes += res[1].StartStation.ToString() + " " + res[1].EndStation.ToString();
+            for (int i = 0; i < res[1].PassedStations.Count-1; i++)
+            {
+                costRes += res[1].PassedStations[i] + "("+ res[1].Buses[i]+")";
+            }
+            try { costRes += res[1].PassedStations[res[1].PassedStations.Count - 1] + " "; } catch { }
+            costRes += res[1].StartStation.ToString() + "(" + res[1].BusId+")"+ res[1].EndStation.ToString();
             costRes += " Цена поездки : " + res[1].Cost;
             listBox2.Items.Add(costRes);
             listBox2.Items.Add(timeRes);

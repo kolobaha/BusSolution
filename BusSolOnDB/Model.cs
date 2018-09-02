@@ -25,13 +25,12 @@ namespace BusSolOnDB
             StartTime = startTime;
             EndTime = StartTime + time;
             Cost = cost;
-            PassedBuses.Add(busId);
-            PassedStations.Add(startSt);
         }
         public Transaction()
         {
             PassedBuses = new List<int>();
             PassedStations = new List<int>();
+            Buses = new List<int>();
         }
 
         public Transaction(Transaction oldTansact, int period) : this()
@@ -42,8 +41,6 @@ namespace BusSolOnDB
             StartTime = oldTansact.StartTime + period;
             EndTime = oldTansact.EndTime + period;
             Cost = oldTansact.Cost;
-            //PassedBuses.Add(oldTansact.BusId);
-            //PassedStations.Add(oldTansact.StartStation);
         }
         public override string ToString()
         {
@@ -57,7 +54,14 @@ namespace BusSolOnDB
             {
                 buses += bus.ToString() + " ";
             }
-            return "Buses: " + buses + " | " + "Stations: " + stations + " | " + BusId + " | " + StartStation + " | " + EndStation + " | " + StartTime + " | " + EndTime + " | " + Cost + " | ";
+            return "Buses: " + buses
+                + " Stations: " + stations
+                + " Current Bus:  " + BusId
+                + " Starts: " + StartStation
+                + " Ends: " + EndStation
+                + " Starts at: " + Constans.GetTimeFromNimutes(StartTime)
+                + " Ends at: " + Constans.GetTimeFromNimutes(EndTime)
+                + " Cost: " + Cost;
         }
     }
     public class Bus// Класс для хранения исходных данных об автобусах
@@ -74,7 +78,10 @@ namespace BusSolOnDB
         }
         public override string ToString()
         {
-            return Id + " | " + Cost + " | " + StartTime + " | " + Period;
+            return "Bus Num: " + Id
+                + " Cost: " + Cost
+                + " Starts at: " + Constans.GetTimeFromNimutes(StartTime)
+                + " Period: " + Period;
         }
     }
     public class Move // Классд для хранения исходных данных о переездах
@@ -93,7 +100,10 @@ namespace BusSolOnDB
 
         public override string ToString()
         {
-            return BusId + " | " + StationFrom + " | " + StationTo + " | " + Time;
+            return "Bus " + BusId 
+                + " Start from: " + StationFrom 
+                + " Moves to: " + StationTo 
+                + " Time: " + Time;
         }
     }
 }

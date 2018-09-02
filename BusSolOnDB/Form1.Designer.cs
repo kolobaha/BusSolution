@@ -44,11 +44,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.endStTB = new System.Windows.Forms.TextBox();
             this.startStTB = new System.Windows.Forms.TextBox();
-            this.stTimeTB = new System.Windows.Forms.TextBox();
+            this.startHour = new System.Windows.Forms.TextBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.Gen_button = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.listBox3 = new System.Windows.Forms.ListBox();
+            this.startMinute = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -138,13 +140,15 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.IterateBut);
             this.tabPage2.Controls.Add(this.label3);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.label1);
             this.tabPage2.Controls.Add(this.endStTB);
             this.tabPage2.Controls.Add(this.startStTB);
-            this.tabPage2.Controls.Add(this.stTimeTB);
+            this.tabPage2.Controls.Add(this.startMinute);
+            this.tabPage2.Controls.Add(this.startHour);
             this.tabPage2.Controls.Add(this.listBox2);
             this.tabPage2.Controls.Add(this.Gen_button);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -161,14 +165,14 @@
             this.IterateBut.Name = "IterateBut";
             this.IterateBut.Size = new System.Drawing.Size(75, 23);
             this.IterateBut.TabIndex = 8;
-            this.IterateBut.Text = "Iteration";
+            this.IterateBut.Text = "Solution";
             this.IterateBut.UseVisualStyleBackColor = true;
             this.IterateBut.Click += new System.EventHandler(this.IterateBut_Click);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(401, 34);
+            this.label3.Location = new System.Drawing.Point(365, 21);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(62, 13);
             this.label3.TabIndex = 7;
@@ -177,7 +181,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(207, 34);
+            this.label2.Location = new System.Drawing.Point(224, 21);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(65, 13);
             this.label2.TabIndex = 6;
@@ -186,7 +190,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(28, 34);
+            this.label1.Location = new System.Drawing.Point(36, 21);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(55, 13);
             this.label1.TabIndex = 5;
@@ -194,27 +198,27 @@
             // 
             // endStTB
             // 
-            this.endStTB.Location = new System.Drawing.Point(472, 24);
+            this.endStTB.Location = new System.Drawing.Point(433, 21);
             this.endStTB.Name = "endStTB";
-            this.endStTB.Size = new System.Drawing.Size(100, 20);
+            this.endStTB.Size = new System.Drawing.Size(37, 20);
             this.endStTB.TabIndex = 4;
             this.endStTB.Text = "3";
             // 
             // startStTB
             // 
-            this.startStTB.Location = new System.Drawing.Point(278, 24);
+            this.startStTB.Location = new System.Drawing.Point(295, 21);
             this.startStTB.Name = "startStTB";
-            this.startStTB.Size = new System.Drawing.Size(100, 20);
+            this.startStTB.Size = new System.Drawing.Size(38, 20);
             this.startStTB.TabIndex = 3;
             this.startStTB.Text = "1";
             // 
-            // stTimeTB
+            // startHour
             // 
-            this.stTimeTB.Location = new System.Drawing.Point(89, 24);
-            this.stTimeTB.Name = "stTimeTB";
-            this.stTimeTB.Size = new System.Drawing.Size(100, 20);
-            this.stTimeTB.TabIndex = 2;
-            this.stTimeTB.Text = "800";
+            this.startHour.Location = new System.Drawing.Point(106, 21);
+            this.startHour.Name = "startHour";
+            this.startHour.Size = new System.Drawing.Size(30, 20);
+            this.startHour.TabIndex = 2;
+            this.startHour.Text = "12";
             // 
             // listBox2
             // 
@@ -252,6 +256,23 @@
             this.listBox3.Name = "listBox3";
             this.listBox3.Size = new System.Drawing.Size(792, 400);
             this.listBox3.TabIndex = 0;
+            // 
+            // startMinute
+            // 
+            this.startMinute.Location = new System.Drawing.Point(158, 21);
+            this.startMinute.Name = "startMinute";
+            this.startMinute.Size = new System.Drawing.Size(30, 20);
+            this.startMinute.TabIndex = 2;
+            this.startMinute.Text = "00";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(142, 24);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(10, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = ":";
             // 
             // Form1
             // 
@@ -293,7 +314,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox endStTB;
         private System.Windows.Forms.TextBox startStTB;
-        private System.Windows.Forms.TextBox stTimeTB;
+        private System.Windows.Forms.TextBox startHour;
         private System.Windows.Forms.ListBox listBox2;
         private System.Windows.Forms.Button Gen_button;
         private System.Windows.Forms.Label label3;
@@ -301,6 +322,8 @@
         private System.Windows.Forms.ToolStripMenuItem вводИсходныхДанныхToolStripMenuItem;
         private System.Windows.Forms.ListBox listBox3;
         private System.Windows.Forms.Button IterateBut;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox startMinute;
     }
 }
 

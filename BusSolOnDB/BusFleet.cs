@@ -35,11 +35,15 @@ namespace BusSolOnDB
             Moves.Add(new Move(2, 1, 2, 10));
             Moves.Add(new Move(2, 2, 4, 5));
             Moves.Add(new Move(2, 4, 1, 20));
+            SetPeriods();
+            StationCount = 5;
+        }
+        public void SetPeriods()
+        {
             foreach (var Bus in Buses)//Рассчитываем периоды движения для автобусов
             {
                 Bus.Period = Moves.Where(c => c.BusId == Bus.Id).Sum(c => c.Time);
             }
-            StationCount = 5;
         }
         public bool IsWaysExist(List<Transaction> transactionMap, int startStation, int endStation, int startTime)
         {
@@ -50,12 +54,12 @@ namespace BusSolOnDB
             }
             if (transactionMap.Where(x => x.EndStation == endStation).Count() <= 0)
             {
-               // MessageBox.Show("Доехать до станции назначения невозможно.");
+                // MessageBox.Show("Доехать до станции назначения невозможно.");
                 return false;
             }
             if (transactionMap.Where(x => x.StartTime >= startTime).Count() <= 0)
             {
-              //  MessageBox.Show("Так поздно автобусы не ходят.");
+                //  MessageBox.Show("Так поздно автобусы не ходят.");
                 return false;
             }
             return true;
@@ -103,7 +107,7 @@ namespace BusSolOnDB
             }
             return initialTransportMap;
         }
-        public void EnterData(StreamReader myStream)// Метод парсинга текстового файла для получения исходных данных к задаче
+        public void ReadData(StreamReader myStream)// Метод парсинга текстового файла для получения исходных данных к задаче
         {
             string lineFile;
             List<String> data = new List<String>();
@@ -113,10 +117,39 @@ namespace BusSolOnDB
                 data.Add(lineFile);
             }
             while (lineFile != null);
-            int countBus = Convert.ToInt32(data[0]);
-            int countStation = Convert.ToInt32(data[1]);
-            string[] timesArrive = data[2].Split(' ');
-            string[] costs = data[3].Split(' ');
+            BusesCount = Convert.ToInt32(data[0]);
+            StationCount = Convert.ToInt32(data[1]);
+            Moves.Clear();
+            Buses.Clear();
+            var busesStarts = data[2].Split(' ').Select(x => Convert.ToInt32(Convert.ToDateTime(x).Hour * Constans.MinutesInHour + Convert.ToDateTime(x).Minute)).ToList();
+            var costs = data[3].Split(' ').Select(x => Convert.ToInt32(x)).ToList();
+            for (int i = 1; i <= BusesCount; i++)
+            {
+                Buses.Add(new Bus(i, costs[i - 1], busesStarts[i - 1]));
+            }
+            int currentBus = 1;
+            for (int i = 4; i < BusesCount + 4; i++)
+            {
+                var moves = data[i].Split(' ');
+                int count = Convert.ToInt32(moves[0]);
+                List<int> stations = new List<int>();
+                for (int j = 1; j < count + 1; j++)//Станции, которые входят в конкретный маршрут
+                {
+                    stations.Add(Convert.ToInt32(moves[j]));
+                }
+                List<int> times = new List<int>();
+                for (int k = count + 1; k < moves.Count(); k++)//Время переездов между станциями
+                {
+                    times.Add(Convert.ToInt32(moves[k]));
+                }
+                for (int u = 0; u < count - 1; u++)
+                {
+                    Moves.Add(new Move(currentBus, stations[u], stations[u + 1], times[u]));
+                }
+                Moves.Add(new Move(currentBus, stations[stations.Count - 1], stations[0], times[times.Count - 1]));
+                currentBus++;
+            }
+            SetPeriods();
         }
         public void InitializeMarks(ref Transaction LenghtMark, ref Transaction CostMark)
         {
@@ -130,11 +163,14 @@ namespace BusSolOnDB
                     LenghtMark.PassedStations.Add(i);
                 }
             }
-            LenghtMark.PassedStations.Add(StationCount+1);
+            LenghtMark.PassedStations.Add(StationCount + 1);
         }
         public List<Transaction> Solution(int startStation, int endStation, int startTime)
         {
-            if (!IsWaysExist(BigTransportMap, startStation, endStation, startTime)) return null;
+            if (!IsWaysExist(BigTransportMap, startStation, endStation, startTime))
+            {
+                return new List<Transaction>() ;
+            }
             List<Transaction> resultMatrix = new List<Transaction>();//После всех проверок генерируем карту переездов от станции отправления.
             var p = BigTransportMap.Where(x => x.StartStation == startStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
             foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
@@ -143,7 +179,7 @@ namespace BusSolOnDB
             }
             Transaction resultOnCostTransaction = new Transaction();
             Transaction resultOnLenghtTransaction = new Transaction(); // Для данной оценки задать начальное значение, как список станций + 1 
-            InitializeMarks(ref resultOnLenghtTransaction, ref  resultOnCostTransaction);
+            InitializeMarks(ref resultOnLenghtTransaction, ref resultOnCostTransaction);
             SolutionIteration(resultMatrix, endStation, ref resultOnLenghtTransaction, ref resultOnCostTransaction);
             resultMatrix.Clear();
             resultMatrix.Add(resultOnLenghtTransaction);
@@ -187,6 +223,8 @@ namespace BusSolOnDB
                             potentialTransaction.Cost = Cost;
                             potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations);
                             potentialTransaction.PassedStations.Add(oldTransact.StartStation);
+                            int bus = oldTransact.BusId;
+                            potentialTransaction.Buses.Add(bus);
                             newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию ToDo: Проверка на новый автобус!
                         }
                 }
