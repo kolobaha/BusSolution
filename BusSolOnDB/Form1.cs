@@ -52,26 +52,22 @@ namespace BusSolOnDB
 {
     public partial class Form1 : Form
     {
-        List<Bus> Buses = new List<Bus>();
-        List<Move> Moves = new List<Move>();
-        List<Transaction> TransportMap = new List<Transaction>();//Оперативная матрица переездов на текущий момент
-        List<Transaction> BigTransportMap = new List<Transaction>();//Все возможные переезды
-
+        BusFleet TaskBusFleet = new BusFleet();
         public Form1()
         {
             InitializeComponent();
         }
 
-        private async void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            GetTestData();
+            TaskBusFleet.GetTestData();
             listBox1.Items.Add("Buses:");
-            foreach (var bus in Buses)
+            foreach (var bus in TaskBusFleet.Buses)
             {
                 listBox1.Items.Add(bus.ToString());
             }
             listBox3.Items.Add("Ways:");
-            foreach (var move in Moves)
+            foreach (var move in TaskBusFleet.Moves)
             {
                 listBox3.Items.Add(move.ToString());
             }
@@ -95,7 +91,7 @@ namespace BusSolOnDB
             openFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
-
+            
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 try
@@ -104,7 +100,7 @@ namespace BusSolOnDB
                     {
                         using (myStream)
                         {
-                            EnterData(myStream);
+                            TaskBusFleet.EnterData(myStream);
                             MessageBox.Show(openFileDialog1.FileName);
                         }
                     }
@@ -115,259 +111,32 @@ namespace BusSolOnDB
                 }
             }
         }
-        public void EnterData(StreamReader myStream)// Метод парсинга текстового файла для получения исходных данных к задаче
-        {
-            string lineFile;
-            List<String> data = new List<String>();
-            do
-            {
-                lineFile = myStream.ReadLine();
-                data.Add(lineFile);
-            }
-            while (lineFile != null);
-            int countBus = Convert.ToInt32(data[0]);
-            int countStation = Convert.ToInt32(data[1]);
-            string[] timesArrive = data[2].Split(' ');
-            string[] costs = data[3].Split(' ');
-        }
+       
 
-        private async void Button1_Click(object sender, EventArgs e)//Генерируем транспортную карту переездов 
+        private void Button1_Click(object sender, EventArgs e)//Генерируем транспортную карту переездов 
         {
-            BigTransportMap.Clear();
-            int startTime = Convert.ToInt32(stTimeTB.Text);
-            int startStation = Convert.ToInt32(startStTB.Text);
-            TransportMap = GetTransportMap(Buses, Moves);
-            InitializeGlobalMap(TransportMap, startTime);
+            ShowBigMap(GetStartTime());
         }
-        public void GetTestData()
+        public void ShowBigMap(int startTime)
         {
-            Buses.Add(new Bus(Buses.Count() + 1, 10, 10 * Constans.MinutesInHour));
-            Buses.Add(new Bus(Buses.Count() + 1, 20, 12 * Constans.MinutesInHour));
-            Moves.Add(new Move(1, 1, 3, 5));
-            Moves.Add(new Move(1, 3, 1, 7));
-            Moves.Add(new Move(2, 1, 2, 10));
-            Moves.Add(new Move(2, 2, 4, 5));
-            Moves.Add(new Move(2, 4, 1, 20));
-            foreach (var Bus in Buses)//Рассчитываем периоды движения для автобусов
-            {
-                Bus.Period = Moves.Where(c => c.BusId == Bus.Id).Sum(c => c.Time);
-            }
-            // GetTransportMap(Buses, Moves);
+            TaskBusFleet.InitializeBigTransportMap(startTime);
+            ShowIt(TaskBusFleet.BigTransportMap);
         }
         private void EnterTestDataToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
-        private List<Transaction> GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
+       
+        public void ShowIt(List<Transaction> transactionMap)
         {
-            List<Transaction> initialTransportMap = new List<Transaction>();//Первичная карта переездов 
-            int endTime = 0;
-            foreach (var move in moves)
-            {
-                endTime = move.Time + Math.Max(initialTransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
-                if (endTime < Constans.MinutesInHour * Constans.HoursInDay)
-                {
-                    initialTransportMap.Add(new Transaction(
-                          move.BusId,
-                          move.StationFrom,
-                          Math.Max(initialTransportMap.
-                          Where(x => x.EndStation == move.StationFrom).
-                          Select(x => x.EndTime).FirstOrDefault(),
-                            buses.Where(x => x.Id == move.BusId).
-                            Select(x => x.StartTime).FirstOrDefault()),
-                          move.StationTo,
-                          move.Time,
-                          buses.Where(x => x.Id == move.BusId).Select(x => x.Cost).FirstOrDefault()));
-                }
-            }
-            return initialTransportMap;
-        }
-        public void InitializeGlobalMap(List<Transaction> transportMap, int startTime)//Генерация полной карты переездов
-        {
-            int period;
-            int iteration;
-            foreach (var transact in transportMap)
-            {
-                iteration = 0;
-                period = Buses.Where(x => x.Id == transact.BusId).Select(x => x.Period).FirstOrDefault();
-                while (transact.EndTime + period * iteration <= 1440)
-                {
-                    if (transact.StartTime + period * iteration >= startTime)
-                        BigTransportMap.Add(new Transaction(transact, period * iteration));
-                    iteration++;
-                }
-            }
-            BigTransportMap = BigTransportMap.OrderBy(x => x.StartTime).ToList();
             listBox2.Items.Clear();
-            foreach (var transact in BigTransportMap)
+            foreach (var t in transactionMap)
             {
-                listBox2.Items.Add(transact.ToString());
+                if (t != null)
+                    listBox2.Items.Add(t.ToString());
             }
         }
-        //public List<Transaction> SolutionIteration(int startStation)
-        //{
-        //    List<Transaction> newTransportMap = new List<Transaction>();
-        //    TransportMap = bigTransportMap.Where(x => x.StartStation == startStation).ToList();// Возможные пути отправления с указанной станции
-        //    foreach (var transact in TransportMap)
-        //    {
-        //        var p = bigTransportMap.Where(x => x.StartStation == transact.EndStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-        //        foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-        //        {
-        //            newTransportMap.Add(potentialMove.FirstOrDefault(x => x.StartTime >= transact.EndTime));
-        //        }
-        //    }
-        //    if (newTransportMap.Count == 0)
-        //        MessageBox.Show("С данной станции в принципе не сущесвтует отправленя.");
-        //    return newTransportMap;
-        //}
-        public void SolutionIteration(List<Transaction> oldTransportMap, int startStation)
-        {
-            List<Transaction> newTransportMap = new List<Transaction>();
-            foreach (var transact in oldTransportMap.Where(x => x.StartStation == startStation))
-            {
-                var p = BigTransportMap.Where(x => x.StartStation == transact.EndStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-                foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-                {
-                    newTransportMap.Add(potentialMove.FirstOrDefault());
-                }
-            }
-            oldTransportMap = newTransportMap;
-        }
-        public List<Transaction> Solution(int startStation, int endStation, int startTime)
-        {
-            if (BigTransportMap.Where(x => x.StartStation == startStation).Count() <= 0)
-            {
-                MessageBox.Show("Автобусы от заданной станции не ходят.");
-                return null;
-            }
-            if (BigTransportMap.Where(x => x.EndStation == endStation).Count() <= 0)
-            {
-                MessageBox.Show("Доехать до станции назначения невозможно.");
-                return null;
-            }
-            if (BigTransportMap.Where(x => x.StartTime >= startTime).Count() <= 0)
-            {
-                MessageBox.Show("Так поздно автобусы не ходят.");
-                return null;
-            }
-            List<Transaction> transactionMatrix = new List<Transaction>();
-            //После всех проверок генерируем карту переездов от станции отправления.
-            var p = BigTransportMap.Where(x => x.StartStation == startStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-            foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-            {
-                transactionMatrix.Add(potentialMove.FirstOrDefault());
-            }
-            MessageBox.Show(transactionMatrix.Count().ToString());
-            Transaction resultOnTimeTransaction = new Transaction() { Cost = int.MaxValue };
-            Transaction resultOnCostTransaction = new Transaction() { CurrentWayLength = int.MaxValue };
-            SolutionIteration(transactionMatrix, endStation, resultOnTimeTransaction, resultOnCostTransaction);
-            transactionMatrix.Clear();
-            transactionMatrix.Add(resultOnTimeTransaction);
-            transactionMatrix.Add(resultOnCostTransaction);
-            return transactionMatrix;
-        }
 
-        private void SolutionIteration(List<Transaction> oldTransactionMatrix, int endStation, Transaction CostMark, Transaction TimeMark)
-        {
-            // Проверка можно ли прямо сейчас доехать до станции назначения ? Если да , то записи на оценку и удалить
-            var preResultTransactions = oldTransactionMatrix.Where(x => x.EndStation == endStation).ToList();
-            Transaction newOnTimeTransaction = new Transaction() { Cost = int.MaxValue };
-            Transaction newOnCostTransaction = new Transaction() { CurrentWayLength = int.MaxValue };
-            foreach (var transact in preResultTransactions)
-            {
-                if (transact.PassedStations.Count <= TimeMark.CurrentWayLength)
-                {
-                    newOnTimeTransaction = transact;
-                    newOnTimeTransaction.CurrentWayLength = transact.PassedStations.Count;//ToDo: Поменять логику работы с оценками. Плохо, что отдельным полем хранится то, что можно забрать со списка.
-                }
-
-                if (transact.Cost <= CostMark.Cost)
-                {
-                    newOnCostTransaction = transact;
-                }
-
-            }
-            oldTransactionMatrix.RemoveAll(x => x.EndStation == endStation);
-            if (oldTransactionMatrix.Count < 1) return; //Повторяем проверку, что можно уехать далее
-            List<Transaction> newTransactionMatrix = new List<Transaction>();
-            foreach (var oldTransact in oldTransactionMatrix) //Строим матрицу следующих переездов
-            {
-                var p = BigTransportMap.Where(x => x.StartStation == oldTransact.EndStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-                foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-                {
-                    Transaction potentialTransaction = potentialMove.FirstOrDefault();
-                    if (potentialTransaction == null) continue;
-                    var oldPassedStations = oldTransact.PassedStations;
-                    var potentialPassedStations = potentialTransaction.PassedStations;
-                    if (!(oldTransact.PassedStations.Contains(potentialTransaction.StartStation)))//Если таких станций не было
-                        if (potentialTransaction.BusId != oldTransact.PassedBuses.GroupBy(x => x).LastOrDefault()?.Key)//Если мы не садимся на автобус, на котором ехали ранее
-                        {
-                            newTransactionMatrix.Add(potentialMove.FirstOrDefault());//Добавляем данную транзакцию ToDo: Проверка на новый автобус!
-                            newTransactionMatrix[newTransactionMatrix.Count() - 1].PassedBuses.AddRange(oldTransact.PassedBuses);//Добавляем в нее данные о пройденных станциях и автобусах
-                            newTransactionMatrix[newTransactionMatrix.Count() - 1].PassedBuses.Add(oldTransact.BusId);
-                            if (newTransactionMatrix[newTransactionMatrix.Count() - 1].BusId != oldTransact.BusId)
-                                newTransactionMatrix[newTransactionMatrix.Count() - 1].Cost += oldTransact.Cost;
-                            newTransactionMatrix[newTransactionMatrix.Count() - 1].PassedStations.AddRange(oldTransact.PassedStations);//Добавляем в нее данные о пройденных станциях и автобусах
-                            newTransactionMatrix[newTransactionMatrix.Count() - 1].PassedStations.Add(oldTransact.StartStation);
-
-                        }
-                }
-            }
-
-            //SolutionIteration(newTransactionMatrix, endStation, CostMark, TimeMark);//Выполняем новую итерацию.
-        }
-
-        public void SolutionIteration(int iteration)//На основании станций приезда формируем новую транспортную карту (Пока понимажаются оценки или пока их нет)
-        {
-
-            // Оценка записей о переездах, соответсвующие приезду в точку назначения.
-            // На основании оставшихся записей строится новая матрица
-            // Сделать проверку, чтобы переезды не пвторяли станции, на которых уже были через свойство PasssedStations
-            // Каждой записи соотвествуют дальнейшие переезды ( с добавлением свойств PassedSt. и PassedBuses ) , а также с рачетом цены. 
-            // Серии с конкретным автобусом должны быть единственны, т.е. ситуация A1,A1,A1,A2,A2,A1 - недопустима
-
-            List<int> startStations = new List<int>();
-
-            if (iteration != 1)
-                startStations = TransportMap.Select(x => x.EndStation).ToList();
-            else
-            {
-                startStations.Add(Convert.ToInt32(startStTB.Text));
-            }
-
-            List<Transaction> newIterationTransportMap = new List<Transaction>();
-            foreach (var transact in TransportMap)
-            {
-                Transaction nextTransact;
-                Transaction oldTransact;
-                var p = BigTransportMap.Where(x => startStations.Contains(x.StartStation)).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-                foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-                {
-                    oldTransact = potentialMove.FirstOrDefault();
-                    nextTransact = oldTransact;//Ошибка! Надо брать следующий переезд
-                    nextTransact.PassedBuses.Add(oldTransact.BusId);
-                    if (nextTransact.BusId != oldTransact.BusId)
-                        nextTransact.Cost += oldTransact.Cost;
-                    newIterationTransportMap.Add(nextTransact);
-                }
-            }
-            TransportMap = newIterationTransportMap;
-        }
-
-        public void SolutionIteration(List<Transaction> oldTransportMap)
-        {
-            List<Transaction> newTransportMap = new List<Transaction>();
-            Transaction newTransact = new Transaction();
-            foreach (var transact in oldTransportMap)
-            {
-                var p = BigTransportMap.Where(x => x.StartStation == transact.EndStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-                foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-                {
-                    newTransportMap.Add(potentialMove.FirstOrDefault());
-                }
-            }
-            oldTransportMap = newTransportMap;
-        }
         public int GetStartTime()
         {
             return Convert.ToInt32(stTimeTB.Text);
@@ -380,14 +149,35 @@ namespace BusSolOnDB
         {
             return Convert.ToInt32(endStTB.Text);
         }
+        public void SolutionResult()
+        {
+            var res = TaskBusFleet.Solution(GetStartStation(), GetEndStation(), GetStartTime()).ToList();
+            if (res == null || res.Count != 2) MessageBox.Show("Решение ошибочно!");
+
+            string timeRes = "Самый быстрый маршрут : ";
+            foreach (var station in res[0].PassedStations)
+            {
+                timeRes += station + " ";
+            }
+            timeRes += res[0].StartStation.ToString() +" "+ res[0].EndStation.ToString();
+
+            timeRes += " Время прибытия : " + res[0].EndTime/Constans.MinutesInHour + " " + res[0].EndTime % Constans.MinutesInHour;
+
+            string costRes = "Самый дешёвый маршрут : ";
+            foreach (var station in res[1].PassedStations)
+            {
+                costRes += station + " ";
+            }
+            costRes += res[1].StartStation.ToString() + " " + res[1].EndStation.ToString();
+            costRes += " Цена поездки : " + res[1].Cost;
+            listBox2.Items.Add(costRes);
+            listBox2.Items.Add(timeRes);
+
+        }
         private void IterateBut_Click(object sender, EventArgs e)
         {
             listBox2.Items.Clear();
-            foreach (var transact in Solution(GetStartStation(), GetEndStation(), GetStartTime()))
-            {
-                if (transact != null)
-                    listBox2.Items.Add(transact.ToString());
-            }
+            SolutionResult();
         }
     }
 }
