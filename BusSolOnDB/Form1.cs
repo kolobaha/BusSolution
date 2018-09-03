@@ -94,7 +94,7 @@ namespace BusSolOnDB
         {
             StreamReader myStream = null;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.InitialDirectory = "c:\\Documents";
+            openFileDialog1.InitialDirectory = "c:\\Documents\\BusTask";
             openFileDialog1.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;

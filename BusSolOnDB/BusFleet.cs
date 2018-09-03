@@ -213,21 +213,19 @@ namespace BusSolOnDB
                 {
                     Transaction potentialTransaction = potentialMove.FirstOrDefault();
                     if (potentialTransaction == null) continue;
-                    if (!(oldTransact.PassedStations.Contains(potentialTransaction.StartStation)))//Если таких станций не было
-                        if (!(oldTransact.PassedBuses.Contains(potentialTransaction.BusId) || potentialTransaction.BusId == oldTransact.PassedBuses.LastOrDefault()))//Если мы не садимся на автобус, на котором катались в прошлом 
-                        {
+                    if ((oldTransact.PassedStations.Contains(potentialTransaction.StartStation))) continue;//Если таких станций не было
+                    if (oldTransact.PassedBuses.Contains(potentialTransaction.BusId) || potentialTransaction.BusId == oldTransact.PassedBuses.LastOrDefault()) continue;//Если мы не садимся на автобус, на котором катались в прошлом 
                             int Cost = oldTransact.Cost;
                             if (potentialTransaction.BusId != oldTransact.BusId) Cost += potentialTransaction.Cost;
                             string way = oldTransact.Way + potentialTransaction.Way;
                             potentialTransaction.Way = way;
-                            potentialTransaction.PassedBuses.AddRange(oldTransact.PassedBuses);
+                            potentialTransaction.PassedBuses.AddRange(oldTransact.PassedBuses.ToList());
                             potentialTransaction.PassedBuses.Add(oldTransact.BusId);
                             potentialTransaction.PassedBuses.Distinct();
                             potentialTransaction.Cost = Cost;
-                            potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations);
+                            potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations.ToList());
                             potentialTransaction.PassedStations.Add(oldTransact.StartStation);
                             newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию 
-                        }
                 }
             }
             if (newTransactionMatrix.Count > 0) SolutionIteration(newTransactionMatrix, endStation, ref TimeMark, ref CostMark);//Выполняем новую итерацию.
