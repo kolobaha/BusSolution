@@ -10,7 +10,7 @@ namespace BusSolOnDB
     {
         public List<int> PassedBuses { get; set; } // 2 неатомарынх атрибута, хранящие историю о переездах, предшевствующих данному.
         public List<int> PassedStations { get; set; }
-        public List<int> Buses { get; set; } //Переезды 
+        public string Way { get; set; } //Переезды 
         public int BusId { get; set; }
         public int StartStation { get; set; }
         public int EndStation { get; set; }
@@ -25,22 +25,24 @@ namespace BusSolOnDB
             StartTime = startTime;
             EndTime = StartTime + time;
             Cost = cost;
+            Way += startSt.ToString() + "(" + BusId.ToString() + ")";
         }
         public Transaction()
         {
             PassedBuses = new List<int>();
             PassedStations = new List<int>();
-            Buses = new List<int>();
+            Way = "";
         }
 
-        public Transaction(Transaction oldTansact, int period) : this()
+        public Transaction(Transaction oldTansact, int period) : this(oldTansact.BusId,oldTansact.StartStation,oldTansact.StartTime,oldTansact.EndStation,oldTansact.EndTime,oldTansact.Cost)
         {
-            BusId = oldTansact.BusId;
-            StartStation = oldTansact.StartStation;
-            EndStation = oldTansact.EndStation;
+            //BusId = oldTansact.BusId;
+            //StartStation = oldTansact.StartStation;
+            //EndStation = oldTansact.EndStation;
             StartTime = oldTansact.StartTime + period;
             EndTime = oldTansact.EndTime + period;
-            Cost = oldTansact.Cost;
+            //Cost = oldTansact.Cost;
+            //Way += oldTansact.StartStation.ToString() + "(" + oldTansact.BusId.ToString() + ")";
         }
         public override string ToString()
         {
@@ -54,7 +56,7 @@ namespace BusSolOnDB
             {
                 buses += bus.ToString() + " ";
             }
-            return "Buses: " + buses
+            return "Way: " + Way
                 + " Stations: " + stations
                 + " Current Bus:  " + BusId
                 + " Starts: " + StartStation

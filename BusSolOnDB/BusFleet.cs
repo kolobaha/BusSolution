@@ -167,6 +167,7 @@ namespace BusSolOnDB
         }
         public List<Transaction> Solution(int startStation, int endStation, int startTime)
         {
+            InitializeBigTransportMap(startTime);
             if (!IsWaysExist(BigTransportMap, startStation, endStation, startTime))
             {
                 return new List<Transaction>() ;
@@ -217,15 +218,15 @@ namespace BusSolOnDB
                         {
                             int Cost = oldTransact.Cost;
                             if (potentialTransaction.BusId != oldTransact.BusId) Cost += potentialTransaction.Cost;
+                            string way = oldTransact.Way + potentialTransaction.Way;
+                            potentialTransaction.Way = way;
                             potentialTransaction.PassedBuses.AddRange(oldTransact.PassedBuses);
                             potentialTransaction.PassedBuses.Add(oldTransact.BusId);
                             potentialTransaction.PassedBuses.Distinct();
                             potentialTransaction.Cost = Cost;
                             potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations);
                             potentialTransaction.PassedStations.Add(oldTransact.StartStation);
-                            int bus = oldTransact.BusId;
-                            potentialTransaction.Buses.Add(bus);
-                            newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию ToDo: Проверка на новый автобус!
+                            newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию 
                         }
                 }
             }
