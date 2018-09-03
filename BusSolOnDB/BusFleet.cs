@@ -173,11 +173,11 @@ namespace BusSolOnDB
                 return new List<Transaction>() ;
             }
             List<Transaction> resultMatrix = new List<Transaction>();//После всех проверок генерируем карту переездов от станции отправления.
-            var p = BigTransportMap.Where(x => x.StartStation == startStation).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-            foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-            {
-                resultMatrix.Add(potentialMove.FirstOrDefault());
-            }
+             resultMatrix = BigTransportMap.Where(x => x.StartStation == startStation && x.EndTime <= startTime + Buses.Sum(y => y.Period)).ToList();//. GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
+            //foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
+            //{
+            //    resultMatrix.Add(potentialMove.FirstOrDefault());
+            //}
             Transaction resultOnCostTransaction = new Transaction();
             Transaction resultOnLenghtTransaction = new Transaction(); // Для данной оценки задать начальное значение, как список станций + 1 
             InitializeMarks(ref resultOnLenghtTransaction, ref resultOnCostTransaction);
