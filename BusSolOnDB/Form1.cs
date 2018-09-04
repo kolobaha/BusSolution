@@ -169,17 +169,12 @@ namespace BusSolOnDB
 
             timeRes += res[0].Way + res[0].EndStation.ToString() ;
            
-           // try { timeRes += res[0].PassedStations[res[0].PassedStations.Count - 1] + " "; } catch { }
-           //  timeRes += res[0].StartStation.ToString() + "(" + res[0].BusId + ")" + res[0].EndStation.ToString();
-
             timeRes += " Время прибытия : " + Constans.GetTimeFromNimutes(res[0].EndTime);
 
             string costRes = "Самый дешёвый маршрут : ";
           
             costRes += res[1].Way + res[1].EndStation.ToString();
          
-           // try { costRes += res[1].PassedStations[res[1].PassedStations.Count - 1] + " "; } catch { }
-           // costRes += res[1].StartStation.ToString() + "(" + res[1].BusId+")"+ res[1].EndStation.ToString();
             costRes += " Цена поездки : " + res[1].Cost;
             listBox2.Items.Add(costRes);
             listBox2.Items.Add(timeRes);
@@ -189,6 +184,11 @@ namespace BusSolOnDB
         {
             listBox2.Items.Clear();
             SolutionResult();
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            ShowIt(TaskBusFleet.GetTransportMap(TaskBusFleet.Buses, TaskBusFleet.Moves));
         }
     }
 }

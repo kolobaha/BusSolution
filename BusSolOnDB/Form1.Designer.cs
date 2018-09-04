@@ -38,19 +38,19 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.label4 = new System.Windows.Forms.Label();
             this.IterateBut = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.endStTB = new System.Windows.Forms.TextBox();
             this.startStTB = new System.Windows.Forms.TextBox();
+            this.startMinute = new System.Windows.Forms.TextBox();
             this.startHour = new System.Windows.Forms.TextBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
             this.Gen_button = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.listBox3 = new System.Windows.Forms.ListBox();
-            this.startMinute = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -159,6 +159,15 @@
             this.tabPage2.Text = "TransportCard";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(142, 24);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(10, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = ":";
+            // 
             // IterateBut
             // 
             this.IterateBut.Location = new System.Drawing.Point(685, 21);
@@ -212,6 +221,14 @@
             this.startStTB.TabIndex = 3;
             this.startStTB.Text = "1";
             // 
+            // startMinute
+            // 
+            this.startMinute.Location = new System.Drawing.Point(158, 21);
+            this.startMinute.Name = "startMinute";
+            this.startMinute.Size = new System.Drawing.Size(30, 20);
+            this.startMinute.TabIndex = 2;
+            this.startMinute.Text = "00";
+            // 
             // startHour
             // 
             this.startHour.Location = new System.Drawing.Point(106, 21);
@@ -256,23 +273,6 @@
             this.listBox3.Name = "listBox3";
             this.listBox3.Size = new System.Drawing.Size(792, 400);
             this.listBox3.TabIndex = 0;
-            // 
-            // startMinute
-            // 
-            this.startMinute.Location = new System.Drawing.Point(158, 21);
-            this.startMinute.Name = "startMinute";
-            this.startMinute.Size = new System.Drawing.Size(30, 20);
-            this.startMinute.TabIndex = 2;
-            this.startMinute.Text = "00";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(142, 24);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(10, 13);
-            this.label4.TabIndex = 9;
-            this.label4.Text = ":";
             // 
             // Form1
             // 

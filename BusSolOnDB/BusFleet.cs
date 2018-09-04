@@ -83,20 +83,20 @@ namespace BusSolOnDB
             }
             BigTransportMap = BigTransportMap.OrderBy(x => x.StartTime).ToList();
         }
-        private List<Transaction> GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
+        public List<Transaction> GetTransportMap(List<Bus> buses, List<Move> moves)//Входные параметры на случай ухода от глобальных списков
         {
             List<Transaction> initialTransportMap = new List<Transaction>();//Первичная карта переездов 
             int endTime = 0;
             foreach (var move in moves)
             {
-                endTime = move.Time + Math.Max(initialTransportMap.Where(x => x.EndStation == move.StationFrom).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
+                endTime = move.Time + Math.Max(initialTransportMap.Where(x => x.EndStation == move.StationFrom && x.BusId == move.BusId).Select(x => x.EndTime).FirstOrDefault(), buses.Where(x => x.Id == move.BusId).Select(x => x.StartTime).FirstOrDefault());
                 if (endTime < Constans.MinutesInHour * Constans.HoursInDay)
                 {
                     initialTransportMap.Add(new Transaction(
                           move.BusId,
                           move.StationFrom,
                           Math.Max(initialTransportMap.
-                          Where(x => x.EndStation == move.StationFrom).
+                          Where(x => x.EndStation == move.StationFrom && x.BusId == move.BusId).
                           Select(x => x.EndTime).FirstOrDefault(),
                             buses.Where(x => x.Id == move.BusId).
                             Select(x => x.StartTime).FirstOrDefault()),
@@ -170,14 +170,10 @@ namespace BusSolOnDB
             InitializeBigTransportMap(startTime);
             if (!IsWaysExist(BigTransportMap, startStation, endStation, startTime))
             {
-                return new List<Transaction>() ;
+                return new List<Transaction>();
             }
             List<Transaction> resultMatrix = new List<Transaction>();//После всех проверок генерируем карту переездов от станции отправления.
-             resultMatrix = BigTransportMap.Where(x => x.StartStation == startStation && x.EndTime <= startTime + Buses.Sum(y => y.Period)).ToList();//. GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
-            //foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
-            //{
-            //    resultMatrix.Add(potentialMove.FirstOrDefault());
-            //}
+            resultMatrix = BigTransportMap.Where(x => x.StartStation == startStation && x.StartTime >= Buses.Min(y => y.StartTime)).ToList();//. GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
             Transaction resultOnCostTransaction = new Transaction();
             Transaction resultOnLenghtTransaction = new Transaction(); // Для данной оценки задать начальное значение, как список станций + 1 
             InitializeMarks(ref resultOnLenghtTransaction, ref resultOnCostTransaction);
@@ -194,11 +190,11 @@ namespace BusSolOnDB
 
             foreach (var transact in preResultTransactions)
             {
-                if (transact.PassedStations.Count <= TimeMark.PassedStations.Count)
+                if (transact.PassedStations.Count < TimeMark.PassedStations.Count)
                 {
                     TimeMark = transact;
                 }
-                if (transact.Cost <= CostMark.Cost)
+                if (transact.Cost < CostMark.Cost)
                 {
                     CostMark = transact;
                 }
@@ -208,24 +204,24 @@ namespace BusSolOnDB
             List<Transaction> newTransactionMatrix = new List<Transaction>();
             foreach (var oldTransact in oldTransactionMatrix) //Строим матрицу следующих переездов
             {
-                var p = BigTransportMap.Where(x => x.StartStation == oldTransact.EndStation && x.StartTime >= oldTransact.EndTime).GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
+                List<Transaction> p = BigTransportMap.Where(x => x.StartStation == oldTransact.EndStation && x.StartTime >= oldTransact.EndTime).ToList();//GroupBy(x => x.BusId);//Отбираем транзакции по следующей станции прибытия
                 foreach (var potentialMove in p)//Берём следующий автобус по возможным передвижениям
                 {
-                    Transaction potentialTransaction = potentialMove.FirstOrDefault();
+                    Transaction potentialTransaction = potentialMove;//.FirstOrDefault();
                     if (potentialTransaction == null) continue;
                     if ((oldTransact.PassedStations.Contains(potentialTransaction.StartStation))) continue;//Если таких станций не было
                     if (oldTransact.PassedBuses.Contains(potentialTransaction.BusId) || potentialTransaction.BusId == oldTransact.PassedBuses.LastOrDefault()) continue;//Если мы не садимся на автобус, на котором катались в прошлом 
-                            int Cost = oldTransact.Cost;
-                            if (potentialTransaction.BusId != oldTransact.BusId) Cost += potentialTransaction.Cost;
-                            string way = oldTransact.Way + potentialTransaction.Way;
-                            potentialTransaction.Way = way;
-                            potentialTransaction.PassedBuses.AddRange(oldTransact.PassedBuses.ToList());
-                            potentialTransaction.PassedBuses.Add(oldTransact.BusId);
-                            potentialTransaction.PassedBuses.Distinct();
-                            potentialTransaction.Cost = Cost;
-                            potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations.ToList());
-                            potentialTransaction.PassedStations.Add(oldTransact.StartStation);
-                            newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию 
+                    int Cost = oldTransact.Cost;
+                    if (potentialTransaction.BusId != oldTransact.BusId) Cost += potentialTransaction.Cost;
+                    string way = oldTransact.Way + potentialTransaction.Way;
+                    potentialTransaction.Way = way;
+                    potentialTransaction.PassedBuses.AddRange(oldTransact.PassedBuses.ToList());
+                    potentialTransaction.PassedBuses.Add(oldTransact.BusId);
+                    potentialTransaction.PassedBuses.Distinct();
+                    potentialTransaction.Cost = Cost;
+                    potentialTransaction.PassedStations.AddRange(oldTransact.PassedStations.ToList());
+                    potentialTransaction.PassedStations.Add(oldTransact.StartStation);
+                    newTransactionMatrix.Add(potentialTransaction);//Добавляем данную транзакцию 
                 }
             }
             if (newTransactionMatrix.Count > 0) SolutionIteration(newTransactionMatrix, endStation, ref TimeMark, ref CostMark);//Выполняем новую итерацию.
