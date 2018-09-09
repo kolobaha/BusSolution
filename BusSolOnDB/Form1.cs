@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using BusSolOnDB.Models;
 //Есть N автобусов, каждый автобус ездит по заранее известному
 //циклическому маршруту.Известна стоимость проезда (оплачивается при
 //входе в автобус) и время движения между остановками.Автобусы выходят
@@ -169,7 +164,7 @@ namespace BusSolOnDB
 
             timeRes += res[0].Way + res[0].EndStation.ToString() ;
            
-            timeRes += " Время прибытия : " + Constans.GetTimeFromNimutes(res[0].EndTime);
+            timeRes += " Время прибытия : " + Constans.GetTimeFromMinutes(res[0].EndTime);
 
             string costRes = "Самый дешёвый маршрут : ";
           
